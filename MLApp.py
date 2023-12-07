@@ -1,4 +1,3 @@
-pip install flask
 from flask import Flask, request, jsonify
 import pickle
 from sklearn.preprocessing import StandardScaler
