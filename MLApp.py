@@ -1,33 +1,35 @@
-from flask import Flask, request, jsonify
-import pickle
-from sklearn.preprocessing import StandardScaler
+# app.py
+import streamlit as st
+import joblib
+import pandas as pd
+from sklearn.ensemble import GradientBoostingClassifier
 
-app = Flask(__name__)
+# Load the pre-trained model
+model = joblib.load('gradient_boosting_model.pkl')
 
-# Load the Ridge Regression model and scaler
-with open('ridge_model.pkl', 'rb') as model_file:
-    ridge_model = pickle.load(model_file)
+def main():
+    st.title("Crime Prediction App")
 
-with open('scaler.pkl', 'rb') as scaler_file:
-    scaler = pickle.load(scaler_file)
+    # Add user inputs, e.g., a form to input data
+    st.sidebar.header("User Inputs")
 
-@app.route('/predict', methods=['POST'])
-def predict():
-    try:
-        # Get the input features from the request
-        features = request.json['features']
+    # Example: Input for OCC_MONTH
+    occ_month = st.sidebar.slider("Select OCC_MONTH", 1, 12, 6)
 
-        # Standardize the input features
-        features_scaled = scaler.transform([features])
+    # You can add more input fields based on your model's features
 
-        # Make predictions
-        prediction = ridge_model.predict(features_scaled)
+    # Create a DataFrame from user inputs
+    user_data = pd.DataFrame({
+        'OCC_MONTH': [occ_month],
+        # Add other features here
+    })
 
-        # Send the prediction as a JSON response
-        return jsonify({'prediction': prediction.tolist()})
+    # Make predictions
+    prediction = model.predict(user_data)
 
-    except Exception as e:
-        return jsonify({'error': str(e)})
+    # Display the prediction
+    st.subheader("Prediction:")
+    st.write(prediction)
 
 if __name__ == '__main__':
-    app.run(port=5000, debug=True)
+    main()
